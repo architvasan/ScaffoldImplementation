@@ -1,0 +1,9 @@
+README.md
+setup.cfg
+setup.py
+scaffold_implementation/__init__.py
+scaffold_implementation/build_scaffold.py
+scaffold_implementation.egg-info/PKG-INFO
+scaffold_implementation.egg-info/SOURCES.txt
+scaffold_implementation.egg-info/dependency_links.txt
+scaffold_implementation.egg-info/top_level.txt
