@@ -33,8 +33,6 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     # query_smiles should already be in sampled_smiles list
     # Just as we can find subscaffolds of a molecule we can find larger scaffolds and molecules from subscaffolds
     #query_mol = Chem.MolFromSmiles(query_smiles)
-
-    # First lets find scaffolds in the above hierarchy (-> 2)
     # We can differentiate molecules from scaffolds using the node 'type' attribute
     # scaffold nodes have type: 'scaffold' whereas molecules have type: 'molecule'  
 
@@ -45,23 +43,70 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
                 if network.nodes[pred]['type'] == 'scaffold':
                     predec_scaffolds.append(pred)   
 
-    succ_scaffolds = []
-    for succ in network.successors(query_smiles):
-        if succ not in sampled_smiles:
-            sampled_smiles.append(succ)
-            if network.nodes[succ]['type'] == 'scaffold':
-                succ_scaffolds.append(succ) 
+    if query_smiles not in succ_scaffolds:
+        for succ in network.successors(query_smiles):
+            if succ not in sampled_smiles:
+                sampled_smiles.append(succ)
+                if network.nodes[succ]['type'] == 'scaffold':
+                    succ_scaffolds.append(succ) 
 
     return sampled_smiles, predec_scaffolds, succ_scaffolds
 
-def iterate():
-    return
+
+def scaffold_hopping(network, starting_smiles, array_size):
+    sampled_smiles = []
+    sampled_smiles.append(starting_smiles)
+
+    predec_scaffolds = []
+    succ_scaffolds = []
+
+    sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network, 
+                                                                      starting_smiles, 
+                                                                      sampled_smiles, 
+                                                                      predec_scaffolds, 
+                                                                      succ_scaffolds)
+
+    it = 0
+    pred_it = 0
+    succ_it = 0
+    while len(sampled_smiles)<array_size:
+        if it%2==0:
+            try:
+                query_smiles = predec_scaffolds[pred_it]
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network,
+                                                                              query_smiles,
+                                                                              sampled_smiles,
+                                                                              predec_scaffolds,
+                                                                              succ_scaffolds)
+                pred_it+=1
+                it+=1
+            except:
+                print("Not enough predecessors")
+                it+=1
+                continue
+            
+       if it%2==1:
+            try:
+                query_smiles = succ_scaffolds[succ_it]
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network,
+                                                                              query_smiles,
+                                                                              sampled_smiles,
+                                                                              predec_scaffolds,
+                                                                              succ_scaffolds)
+                succ_it+=1
+                it+=1
+            except:
+                print("Not enough successors")
+                it+=1
+                continue
+
+    return sampled_smiles
 
 
 
-    print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
+    # print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
 
-    mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
-    Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
+    # mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
+    # Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
     
-    return
+    # return
