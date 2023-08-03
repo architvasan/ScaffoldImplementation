@@ -53,7 +53,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     return sampled_smiles, predec_scaffolds, succ_scaffolds
 
 
-def scaffold_hopping(network, starting_smiles, array_size):
+def scaffold_hopping(network, starting_smiles, target_size):
     sampled_smiles = []
     sampled_smiles.append(starting_smiles)
 
@@ -69,7 +69,7 @@ def scaffold_hopping(network, starting_smiles, array_size):
     it = 0
     pred_it = 0
     succ_it = 0
-    while len(sampled_smiles)<array_size:
+    while len(sampled_smiles)<target_size:
         if it%2==0:
             try:
                 query_smiles = predec_scaffolds[pred_it]
@@ -103,10 +103,17 @@ def scaffold_hopping(network, starting_smiles, array_size):
     return sampled_smiles
 
 
+# Test:
+smiles_file = 'tests/data/test_smiles.csv'
+network = setup_network(smiles_file)
+starting_smiles = 'Cc1c(snn1)C(=O)N2CCC[C@@H](C2)C(=O)c3cnn(c3N)c4ccc(cc4)OC'
+target_size = 100
 
-    # print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
+sampled_smiles = scaffold_hopping(network, starting_smiles, target_size)
+print(sampled_smiles)
+# print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
 
-    # mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
-    # Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
-    
-    # return
+# mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
+# Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
+
+# return
