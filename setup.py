@@ -12,5 +12,3 @@ url = conf_dict["metadata"]["url"]
 version = conf_dict["metadata"]["version"]
 
 setup(download_url=f"{url}/archive/refs/tags/{version}.tar.gz")
-
-
