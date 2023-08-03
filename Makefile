@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-package_name = pipt
+package_name = scaffold_implementation
 extra_folders = 
 isort = isort $(package_name) $(extra_folders)
 black = black --target-version py37 $(package_name) $(extra_folders)
