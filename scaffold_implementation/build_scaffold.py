@@ -44,7 +44,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
                 sampled_smiles.append(pred)
                 if network.nodes[pred]['type'] == 'scaffold':
                     predec_scaffolds.append(pred)   
-    
+
     succ_scaffolds = []
     for succ in network.successors(query_smiles):
         if succ not in sampled_smiles:
@@ -54,6 +54,8 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
 
     return sampled_smiles, predec_scaffolds, succ_scaffolds
 
+def iterate():
+    return
 
 
 
