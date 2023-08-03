@@ -85,7 +85,7 @@ def scaffold_hopping(network, starting_smiles, array_size):
                 it+=1
                 continue
             
-       if it%2==1:
+        elif it%2==1:
             try:
                 query_smiles = succ_scaffolds[succ_it]
                 sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network,
