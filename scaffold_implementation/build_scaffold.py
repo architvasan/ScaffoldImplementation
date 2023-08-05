@@ -19,8 +19,8 @@ import os
 Set up scaffold network
 """
 
-def setup_network(smiles_file):
-    df = pd.read_csv(smiles_file)
+def setup_network(smiles_dataframe):
+    #df = pd.read_csv(smiles_file)
 #    network = sg.ScaffoldNetwork.from_dataframe(df, progress=True)
     network = sg.HierS.from_dataframe(df, progress=True)
     
@@ -147,23 +147,31 @@ def scaffold_hopping(network, target_size):
 
 
 # Test:
-smiles_file = 'test_smiles.smi'
-network = setup_network(smiles_file)
-#print(list(network.get_scaffold_nodes()))
-#starting_smiles = list(network.get_scaffold_nodes())[0]
-target_size = 5000
+if False:
+    smiles_file = 'data/All.sorted.Ena.CACHE.csv'
+    df = pd.read_csv(smiles_file)
+    df['Smiles']=[str(smi) for smi in df['SMILES']]
+    df['Name']=[i for i in range(len(df))]
+    df_new = df[['Smiles','Name']]
+    df_new.to_csv('data/All.sorted.Ena.CACHE.smi',index=False)
+if True:
+    df = pd.read_csv('data/All.sorted.Ena.CACHE.smi')
+    network = setup_network(df)
+    #print(list(network.get_scaffold_nodes()))
+    #starting_smiles = list(network.get_scaffold_nodes())[0]
+    target_size = 20000
 
-sampled_smiles = scaffold_hopping(network, target_size)
-#print(set(sampled_smiles))
-print(len(set(sampled_smiles)))
-# list of names
-with open(r'output_smiles_scaffold_search.smi', 'w') as fp:
-    fp.write('\n'.join(set(sampled_smiles)))
+    sampled_smiles = scaffold_hopping(network, target_size)
+    #print(set(sampled_smiles))
+    print(len(set(sampled_smiles)))
+    # list of names
+    with open(r'output_smiles_scaffold_search.smi', 'w') as fp:
+        fp.write('\n'.join(set(sampled_smiles)))
 
 
-# print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
+    # print('Found {} scaffolds in hierarchy 2 containing {}:'.format(len(next_scaffolds), query_smiles)) 
 
-# mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
-# Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
+    # mols = [Chem.MolFromSmiles(x) for x in next_scaffolds[:6]]
+    # Draw.MolsToGridImage(mols, highlightAtomLists=[mol.GetSubstructMatch(query_mol) for mol in mols])
 
-# return
+    # return
