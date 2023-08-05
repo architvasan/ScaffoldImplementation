@@ -151,7 +151,7 @@ smiles_file = 'test_smiles.smi'
 network = setup_network(smiles_file)
 #print(list(network.get_scaffold_nodes()))
 #starting_smiles = list(network.get_scaffold_nodes())[0]
-target_size = 10000
+target_size = 5000
 
 sampled_smiles = scaffold_hopping(network, target_size)
 #print(set(sampled_smiles))
