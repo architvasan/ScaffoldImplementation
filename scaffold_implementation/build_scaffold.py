@@ -22,8 +22,7 @@ Set up scaffold network
 def setup_network(smiles_dataframe):
     #df = pd.read_csv(smiles_file)
 #    network = sg.ScaffoldNetwork.from_dataframe(df, progress=True)
-    network = sg.HierS.from_dataframe(df, progress=True)
-    
+    network = sg.HierS.from_dataframe(smiles_dataframe, progress=True)
     return network
 
 """
@@ -62,15 +61,15 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     return sampled_smiles, predec_scaffolds, succ_scaffolds
 
 
-def scaffold_hopping(network, target_size):
-    starting_smiles = random.choice(list(network.get_scaffold_nodes()))
+def scaffold_hopping(start_network, sampling_network, target_size):
+    starting_smiles = random.choice(list(start_network.get_scaffold_nodes()))
     sampled_smiles = []
     sampled_smiles.append(starting_smiles)
 
     predec_scaffolds = []
     succ_scaffolds = []
 
-    sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network, 
+    sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network, 
                                                                       starting_smiles, 
                                                                       sampled_smiles, 
                                                                       predec_scaffolds, 
@@ -78,8 +77,8 @@ def scaffold_hopping(network, target_size):
                                                                       target_size)
 
     while len(predec_scaffolds)==0 or len(succ_scaffolds)==0:
-        starting_smiles = random.choice(list(network.get_scaffold_nodes()))
-        sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network, 
+        starting_smiles = random.choice(list(start_network.get_scaffold_nodes()))
+        sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network, 
                                                                       starting_smiles, 
                                                                       sampled_smiles, 
                                                                       predec_scaffolds, 
@@ -94,7 +93,7 @@ def scaffold_hopping(network, target_size):
             try:
                 #print(predec_scaffolds)
                 query_smiles = predec_scaffolds[pred_it]
-                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network,
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network,
                                                                               query_smiles,
                                                                               sampled_smiles,
                                                                               predec_scaffolds,
@@ -105,8 +104,8 @@ def scaffold_hopping(network, target_size):
                 it+=1
             except:
                 print("Not enough predecessors")
-                starting_smiles = random.choice(list(network.get_scaffold_nodes()))
-                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network, 
+                starting_smiles = random.choice(list(start_network.get_scaffold_nodes()))
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network, 
                                                                       starting_smiles, 
                                                                       sampled_smiles, 
                                                                       predec_scaffolds, 
@@ -121,7 +120,7 @@ def scaffold_hopping(network, target_size):
 
                 query_smiles = succ_scaffolds[succ_it]
                 #print(query_smiles)
-                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network,
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network,
                                                                               query_smiles,
                                                                               sampled_smiles,
                                                                               predec_scaffolds,
@@ -131,8 +130,8 @@ def scaffold_hopping(network, target_size):
                 it+=1
             except:
                 print("Not enough successors")
-                starting_smiles = random.choice(list(network.get_scaffold_nodes()))
-                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(network, 
+                starting_smiles = random.choice(list(start_network.get_scaffold_nodes()))
+                sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network, 
                                                                       starting_smiles, 
                                                                       sampled_smiles, 
                                                                       predec_scaffolds, 
@@ -155,13 +154,23 @@ if False:
     df_new = df[['Smiles','Name']]
     df_new.to_csv('data/All.sorted.Ena.CACHE.smi',index=False)
 if True:
-    df = pd.read_csv('data/All.sorted.Ena.CACHE.smi')
-    network = setup_network(df)
+    df_start = pd.read_csv('data/df_top_150_ena_info.csv')
+    df_start['Smiles']=df_start['SMILES']
+    df_start['Name']=[i for i in range(len(df_start))]
+    df_start_new = df_start[['Smiles', 'Name']]
+    df_start_new.to_csv('data/df_top_150_ena.smi')
+if True:
+    df_sampling = pd.read_csv('data/All.sorted.Ena.CACHE.smi')
+    df_start = pd.read_csv('data/df_top_150_ena.smi')
+    sampling_network = setup_network(df_sampling)
+    start_network = setup_network(df_start)
     #print(list(network.get_scaffold_nodes()))
     #starting_smiles = list(network.get_scaffold_nodes())[0]
     target_size = 20000
 
-    sampled_smiles = scaffold_hopping(network, target_size)
+    sampled_smiles = scaffold_hopping(start_network=start_network,
+                                      sampling_network=sampling_network,
+                                      target_size=2000)
     #print(set(sampled_smiles))
     print(len(set(sampled_smiles)))
     # list of names
