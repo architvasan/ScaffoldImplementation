@@ -14,7 +14,6 @@ from rdkit import Chem
 
 import random
 import os
-
 """
 Set up scaffold network
 """
