@@ -38,7 +38,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     # We can differentiate molecules from scaffolds using the node 'type' attribute
     # scaffold nodes have type: 'scaffold' whereas molecules have type: 'molecule'  
 
-    if query_smiles not in (predec_scaffolds or sampled_smiles):
+    if query_smiles not in (predec_scaffolds):
         for pred in network.predecessors(query_smiles):
             if not pred.isnumeric() and pred not in sampled_smiles:
                 sampled_smiles.append(pred)
@@ -48,7 +48,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
                     #print(pred)
                     predec_scaffolds.append(pred)   
 
-    if query_smiles not in (succ_scaffolds or sampled_smiles):
+    if query_smiles not in (succ_scaffolds ):
         for succ in network.successors(query_smiles):
             if not succ.isnumeric() and succ not in sampled_smiles:
                 sampled_smiles.append(succ)
