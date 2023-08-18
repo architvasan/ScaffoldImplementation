@@ -38,7 +38,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     # We can differentiate molecules from scaffolds using the node 'type' attribute
     # scaffold nodes have type: 'scaffold' whereas molecules have type: 'molecule'  
 
-    if query_smiles not in predec_scaffolds:
+    if query_smiles not in (predec_scaffolds or sampled_smiles):
         for pred in network.predecessors(query_smiles):
             if not pred.isnumeric() and pred not in sampled_smiles:
                 sampled_smiles.append(pred)
@@ -48,7 +48,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
                     #print(pred)
                     predec_scaffolds.append(pred)   
 
-    if query_smiles not in succ_scaffolds:
+    if query_smiles not in (succ_scaffolds or sampled_smiles):
         for succ in network.successors(query_smiles):
             if not succ.isnumeric() and succ not in sampled_smiles:
                 sampled_smiles.append(succ)
@@ -60,7 +60,7 @@ def sample_network(network, query_smiles, sampled_smiles, predec_scaffolds, succ
     return sampled_smiles, predec_scaffolds, succ_scaffolds
 
 
-def scaffold_hopping(start_network, sampling_network, target_size):
+def _scaffold_hopping_works(start_network, sampling_network, target_size):
     starting_smiles = random.choice(list(start_network.get_scaffold_nodes()))
     sampled_smiles = []
     sampled_smiles.append(starting_smiles)
@@ -144,6 +144,55 @@ def scaffold_hopping(start_network, sampling_network, target_size):
     return sampled_smiles
 
 
+
+
+
+
+
+
+
+def scaffold_hopping(start_network, sampling_network, target_per_scaff, num_sample_extend):
+    
+    start_nodes = list(start_network.get_scaffold_nodes())
+    sampled_smiles = []
+    predec_scaffolds = []
+    succ_scaffolds = []
+    for it, query_smi in enumerate(start_nodes):
+        sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network,             
+                                                                          query_smi, 
+                                                                          sampled_smiles, 
+                                                                          predec_scaffolds, 
+                                                                          succ_scaffolds,       
+                                                                          target_per_scaff)
+
+        for it_pre in range(min(len(predec_scaffolds), num_sample_extend)):
+            if (it_pre % 10)==0:
+                print(it_pre)
+            query_predec = random.choice(predec_scaffolds)
+            sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network,             
+                                                                      query_predec, 
+                                                                      sampled_smiles, 
+                                                                      predec_scaffolds, 
+                                                                      succ_scaffolds,       
+                                                                      target_per_scaff)
+            predec_scaffolds.remove(query_predec)
+
+
+        for it_succ in range(min(len(succ_scaffolds), num_sample_extend)):
+            if (it_succ % 10)==0:
+                print(it_succ)
+            query_succ = random.choice(succ_scaffolds)
+            sampled_smiles, predec_scaffolds, succ_scaffolds = sample_network(sampling_network,
+                                                                      query_succ,
+                                                                      sampled_smiles,
+                                                                      predec_scaffolds,
+                                                                      succ_scaffolds,
+                                                                      target_per_scaff)
+
+            succ_scaffolds.remove(query_succ)
+
+    return sampled_smiles
+
 # Test:
 if False:
     smiles_file = 'data/All.sorted.Ena.CACHE.csv'
@@ -169,7 +218,9 @@ if True:
 
     sampled_smiles = scaffold_hopping(start_network=start_network,
                                       sampling_network=sampling_network,
-                                      target_size=2000)
+                                        target_per_scaff=100,
+                                        num_sample_extend=10
+                                      )
     #print(set(sampled_smiles))
     print(len(set(sampled_smiles)))
     # list of names
